@@ -1,0 +1,13 @@
+# robots.txt for www.cosmetictreatment.co.uk
+# Last updated: 2026-01-13
+
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
+
+# Sitemap location
+Sitemap: https://www.cosmetictreatment.co.uk/sitemap.xml
