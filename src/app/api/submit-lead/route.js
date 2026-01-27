@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+// Google Apps Script Web App URL
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxS6bRSWe0oQ36wdAly0Rm7G5WH2yiI2i_36A0N_Qzv2fP4F4sq76fPrZQ3cw9Dao73Yg/exec';
+
 export async function POST(request) {
   try {
     const data = await request.json();
@@ -14,9 +17,8 @@ export async function POST(request) {
       );
     }
 
-    // Here you would integrate with Google Sheets or your CRM
-    // For now, we'll log the lead and return success
-    console.log('New lead received:', {
+    // Prepare lead data for Google Sheets
+    const leadData = {
       name,
       phone,
       email,
@@ -25,11 +27,33 @@ export async function POST(request) {
       message: data.message || '',
       timestamp: new Date().toISOString(),
       source: data.source || 'website'
-    });
+    };
 
-    // TODO: Add Google Sheets integration
-    // const sheets = await getGoogleSheets();
-    // await sheets.spreadsheets.values.append({...});
+    console.log('New lead received:', leadData);
+
+    // Send data to Google Sheets via Apps Script Web App
+    try {
+      const sheetsResponse = await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(leadData),
+        redirect: 'follow'
+      });
+
+      const sheetsResult = await sheetsResponse.json();
+      
+      if (sheetsResult.result === 'success') {
+        console.log('Lead successfully added to Google Sheets');
+      } else {
+        console.error('Google Sheets error:', sheetsResult);
+        // Still return success to user even if Sheets fails
+      }
+    } catch (sheetsError) {
+      console.error('Error sending to Google Sheets:', sheetsError);
+      // Continue anyway - don't fail the user's submission
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
