@@ -1,4 +1,3 @@
-
 import './globals.css';
 import Script from 'next/script';
 import Header from '@/components/Header';
@@ -8,6 +7,9 @@ export const metadata = {
   title: 'Cosmetic Treatments London | Compare Top Providers | Free Quotes',
   description: 'Compare aesthetic treatment providers across London. Get free quotes for Botox, dermal fillers, lip fillers, chemical peels, and more from verified practitioners.',
   keywords: 'cosmetic treatments London, Botox London, dermal fillers London, lip fillers London, aesthetics London, anti-wrinkle London, skin treatments London',
+  verification: {
+    google: 'h7xVoaXFKTzIGvKWxd8yT6tg-ULX6wwyk5cTJauiDCE',
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -17,7 +19,6 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
-    <meta name="google-site-verification" content="h7xVoaXFKTzIGvKWxd8yT6tg-ULX6wwyk5cTJauiDCE" />
       </head>
       <body className="font-sans bg-gray-50 text-gray-900 antialiased">
         {/* Google Analytics */}
@@ -33,7 +34,6 @@ export default function RootLayout({ children }) {
             gtag('config', 'G-0G8KENQHGH');
           `}
         </Script>
-
         <Header />
         <main className="min-h-screen">
           {children}
