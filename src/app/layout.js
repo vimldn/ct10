@@ -17,6 +17,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+    <meta name="google-site-verification" content="h7xVoaXFKTzIGvKWxd8yT6tg-ULX6wwyk5cTJauiDCE" />
       </head>
       <body className="font-sans bg-gray-50 text-gray-900 antialiased">
         {/* Google Analytics */}
