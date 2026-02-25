@@ -2,6 +2,8 @@ import Link from 'next/link';
 import FAQAccordion from '@/components/FAQAccordion';
 import { getGeneralFaqs, getAllFaqs } from '@/data/faqs';
 import { services } from '@/data/services';
+import JsonLd from '@/components/JsonLd';
+import { breadcrumbSchema, faqSchema } from '@/lib/schema';
 
 export const metadata = {
   title: 'FAQ | Cosmetic Treatments London | Questions Answered',
@@ -12,8 +14,30 @@ export default function FAQPage() {
   const generalFaqs = getGeneralFaqs();
   const allFaqs = getAllFaqs();
 
+  const baseUrl = 'https://www.cosmetictreatment.co.uk';
+  const pageUrl = `${baseUrl}/faq`;
+
+  const crumbs = breadcrumbSchema([
+    { name: 'Home', url: baseUrl },
+    { name: 'FAQ', url: pageUrl },
+  ]);
+
+  // Only mark up what is actually shown on the page:
+  // - all general FAQs
+  // - first 3 FAQs for the first 8 services
+  const treatmentFaqsShown = services.slice(0, 8).flatMap((service) => {
+    const faqs = allFaqs.treatments[service.slug];
+    if (!faqs || faqs.length === 0) return [];
+    return faqs.slice(0, 3);
+  });
+
+  const faqJsonLd = faqSchema({ faqs: [...generalFaqs, ...treatmentFaqsShown], url: `${pageUrl}#faq` });
+
   return (
     <>
+      <JsonLd data={crumbs} />
+      <JsonLd data={faqJsonLd} />
+
       {/* Hero */}
       <section className="bg-gradient-to-br from-primary-900 to-primary-800 text-white py-16 md:py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -27,7 +51,7 @@ export default function FAQPage() {
       </section>
 
       {/* General FAQs */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24" id="faq">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-8">
             About This Service
@@ -42,12 +66,12 @@ export default function FAQPage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-8">
             Treatment FAQs
           </h2>
-          
+
           <div className="space-y-12">
             {services.slice(0, 8).map((service) => {
               const treatmentFaqs = allFaqs.treatments[service.slug];
               if (!treatmentFaqs || treatmentFaqs.length === 0) return null;
-              
+
               return (
                 <div key={service.slug}>
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">
