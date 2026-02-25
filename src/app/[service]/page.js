@@ -1,5 +1,3 @@
-import JsonLd from "@/components/JsonLd";
-import { breadcrumbSchema, serviceSchema, faqSchema } from "@/lib/schema";
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import LeadForm from '@/components/LeadForm';
@@ -7,7 +5,8 @@ import FAQAccordion from '@/components/FAQAccordion';
 import { getServiceBySlug, getAllServiceSlugs } from '@/data/services';
 import { getBoroughs } from '@/data/locations';
 import { getFaqsByTreatment } from '@/data/faqs';
-
+import JsonLd from '@/components/JsonLd';
+import { breadcrumbSchema, serviceSchema, faqSchema } from '@/lib/schema';
 
 export async function generateStaticParams() {
   return getAllServiceSlugs().map((slug) => ({ service: slug }));
@@ -25,7 +24,7 @@ export async function generateMetadata({ params }) {
 
 export default function ServicePage({ params }) {
   const service = getServiceBySlug(params.service);
-  
+
   if (!service) {
     notFound();
   }
@@ -33,16 +32,27 @@ export default function ServicePage({ params }) {
   const boroughs = getBoroughs();
   const faqs = getFaqsByTreatment(service.slug);
 
+  const baseUrl = 'https://www.cosmetictreatment.co.uk';
+  const crumbs = breadcrumbSchema([
+    { name: 'Home', url: baseUrl },
+    { name: 'Treatments', url: `${baseUrl}/treatments` },
+    { name: service.name, url: `${baseUrl}/${service.slug}` },
+  ]);
+
   return (
     <>
+      <JsonLd data={crumbs} />
+      <JsonLd data={serviceSchema({ service, url: `${baseUrl}/${service.slug}`, areaName: 'London' })} />
+      {faqs && faqs.length > 0 && <JsonLd data={faqSchema({ faqs, url: `${baseUrl}/${service.slug}#faqs` })} />}
+
       {/* Hero */}
       <section className="relative bg-gray-900 text-white min-h-[500px]">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url('https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=1974')" }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/85 to-gray-900/40" />
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -53,14 +63,14 @@ export default function ServicePage({ params }) {
                 <span className="mx-2">/</span>
                 <span className="text-white">{service.name}</span>
               </nav>
-              
+
               <h1 className="text-4xl md:text-5xl font-display font-bold mb-6">
                 {service.name} in London
               </h1>
               <p className="text-xl text-gray-300 mb-8">
                 {service.description}
               </p>
-              
+
               {/* Info Badges */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white/10 backdrop-blur rounded-lg p-4">
@@ -75,7 +85,7 @@ export default function ServicePage({ params }) {
             </div>
 
             <div>
-              <LeadForm 
+              <LeadForm
                 preselectedService={service.slug}
                 title={`Get ${service.name} Quotes`}
                 subtitle="Top clinics will call you within 2 hours"
@@ -135,7 +145,7 @@ export default function ServicePage({ params }) {
           <p className="text-gray-600 mb-8">
             Find {service.name.toLowerCase()} providers in your area
           </p>
-          
+
           <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {boroughs.map((borough) => (
               <Link
@@ -154,7 +164,7 @@ export default function ServicePage({ params }) {
 
       {/* FAQs */}
       {faqs.length > 0 && (
-        <section className="py-16 bg-white">
+        <section className="py-16 bg-white" id="faqs">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-8">
               {service.name} FAQs
