@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getAllBlogSlugs, getBlogBySlug, getRecentBlogs } from '@/data/blogs';
+import JsonLd from '@/components/JsonLd';
+import { breadcrumbSchema, blogPostSchema } from '@/lib/schema';
 
 export async function generateStaticParams() {
   const slugs = getAllBlogSlugs();
@@ -19,15 +21,27 @@ export async function generateMetadata({ params }) {
 
 export default function BlogPostPage({ params }) {
   const blog = getBlogBySlug(params.slug);
-  
+
   if (!blog) {
     notFound();
   }
 
   const recentBlogs = getRecentBlogs(3).filter(b => b.slug !== blog.slug).slice(0, 2);
 
+  const baseUrl = 'https://www.cosmetictreatment.co.uk';
+  const pageUrl = `${baseUrl}/blog/${blog.slug}`;
+
+  const crumbs = breadcrumbSchema([
+    { name: 'Home', url: baseUrl },
+    { name: 'Blog', url: `${baseUrl}/blog` },
+    { name: blog.title, url: pageUrl },
+  ]);
+
   return (
     <>
+      <JsonLd data={crumbs} />
+      <JsonLd data={blogPostSchema({ blog, url: pageUrl })} />
+
       {/* Hero */}
       <section className="bg-gradient-to-br from-primary-900 to-primary-800 text-white py-16 md:py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -43,10 +57,10 @@ export default function BlogPostPage({ params }) {
             <span className="bg-white/20 px-3 py-1 rounded">{blog.category}</span>
             <span>{blog.readTime}</span>
             <span>
-              {new Date(blog.date).toLocaleDateString('en-GB', { 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
+              {new Date(blog.date).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
               })}
             </span>
           </div>
@@ -54,7 +68,7 @@ export default function BlogPostPage({ params }) {
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold mb-6">
             {blog.title}
           </h1>
-          
+
           <p className="text-lg text-primary-100">
             By {blog.author}
           </p>
@@ -64,8 +78,8 @@ export default function BlogPostPage({ params }) {
       {/* Featured Image */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
         <div className="aspect-video rounded-xl overflow-hidden shadow-xl">
-          <img 
-            src={blog.image} 
+          <img
+            src={blog.image}
             alt={blog.title}
             className="w-full h-full object-cover"
           />
@@ -75,7 +89,7 @@ export default function BlogPostPage({ params }) {
       {/* Content - renders HTML */}
       <article className="py-12 md:py-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div 
+          <div
             className="prose prose-lg max-w-none
               prose-headings:text-gray-900 prose-headings:font-bold
               prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
@@ -120,14 +134,14 @@ export default function BlogPostPage({ params }) {
             <h2 className="text-2xl font-bold text-gray-900 mb-8">More Articles</h2>
             <div className="grid md:grid-cols-2 gap-8">
               {recentBlogs.map((relatedBlog) => (
-                <article 
+                <article
                   key={relatedBlog.slug}
                   className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition"
                 >
                   <Link href={`/blog/${relatedBlog.slug}`}>
                     <div className="aspect-video bg-gray-100 overflow-hidden">
-                      <img 
-                        src={relatedBlog.image} 
+                      <img
+                        src={relatedBlog.image}
                         alt={relatedBlog.title}
                         className="w-full h-full object-cover hover:scale-105 transition duration-300"
                       />
