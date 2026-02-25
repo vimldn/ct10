@@ -1,3 +1,5 @@
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbSchema, serviceSchema, faqSchema } from "@/lib/schema";
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import LeadForm from '@/components/LeadForm';
@@ -5,6 +7,7 @@ import FAQAccordion from '@/components/FAQAccordion';
 import { getServiceBySlug, getAllServiceSlugs } from '@/data/services';
 import { getBoroughs } from '@/data/locations';
 import { getFaqsByTreatment } from '@/data/faqs';
+
 
 export async function generateStaticParams() {
   return getAllServiceSlugs().map((slug) => ({ service: slug }));
