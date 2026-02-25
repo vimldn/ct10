@@ -5,31 +5,33 @@ import FAQAccordion from '@/components/FAQAccordion';
 import { getAllLocations, getLocationBySlug, getAllLocationSlugs } from '@/data/locations';
 import { services, getServiceBySlug, getAllServiceSlugs } from '@/data/services';
 import { getFaqsByTreatment } from '@/data/faqs';
-import { 
-  generatePageContent, 
+import {
+  generatePageContent,
   generateTreatmentContext,
   generateWhyLocalContent,
-  generateMetaDescription 
+  generateMetaDescription
 } from '@/data/contentGenerator';
+import JsonLd from '@/components/JsonLd';
+import { breadcrumbSchema, serviceSchema, faqSchema } from '@/lib/schema';
 
 export async function generateStaticParams() {
   const locationSlugs = getAllLocationSlugs();
   const serviceSlugs = getAllServiceSlugs();
-  
+
   const params = [];
   locationSlugs.forEach(city => {
     serviceSlugs.forEach(service => {
       params.push({ city, service });
     });
   });
-  
+
   return params;
 }
 
 export async function generateMetadata({ params }) {
   const location = getLocationBySlug(params.city);
   const service = getServiceBySlug(params.service);
-  
+
   if (!location || !service) return {};
 
   const description = generateMetaDescription(location, service);
@@ -43,12 +45,14 @@ export async function generateMetadata({ params }) {
 export default function CityServicePage({ params }) {
   const location = getLocationBySlug(params.city);
   const service = getServiceBySlug(params.service);
-  
+
   if (!location || !service) {
     notFound();
   }
 
   const faqs = getFaqsByTreatment(service.slug) || [];
+  const faqsShown = faqs.slice(0, 5);
+
   const otherServices = services.filter(s => s.slug !== service.slug).slice(0, 6);
   const nearbyLocations = location.nearbyAreas
     .map(name => getAllLocations().find(l => l.name === name))
@@ -60,8 +64,22 @@ export default function CityServicePage({ params }) {
   const treatmentContext = generateTreatmentContext(location, service);
   const whyLocalContent = generateWhyLocalContent(location, service);
 
+  const baseUrl = 'https://www.cosmetictreatment.co.uk';
+  const pageUrl = `${baseUrl}/locations/${location.slug}/${service.slug}`;
+
+  const crumbs = breadcrumbSchema([
+    { name: 'Home', url: baseUrl },
+    { name: 'Locations', url: `${baseUrl}/locations` },
+    { name: location.name, url: `${baseUrl}/locations/${location.slug}` },
+    { name: service.name, url: pageUrl },
+  ]);
+
   return (
     <>
+      <JsonLd data={crumbs} />
+      <JsonLd data={serviceSchema({ service, url: pageUrl, areaName: location.name })} />
+      {faqsShown.length > 0 && <JsonLd data={faqSchema({ faqs: faqsShown, url: `${pageUrl}#faqs` })} />}
+
       {/* Hero */}
       <section className="bg-gradient-to-br from-primary-900 to-primary-800 text-white py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -77,14 +95,14 @@ export default function CityServicePage({ params }) {
                 <span>→</span>
                 <span>{service.name}</span>
               </nav>
-              
+
               <h1 className="text-4xl md:text-5xl font-display font-bold mb-6">
                 {service.name} in {location.name}
               </h1>
               <p className="text-xl text-primary-100 mb-6">
                 Compare verified {service.name.toLowerCase()} providers in {location.name} and the {location.borough} area. Get free quotes from qualified practitioners and find the best option for your needs and budget.
               </p>
-              
+
               <div className="flex flex-wrap gap-4 mb-6">
                 <div className="bg-white/10 px-4 py-2 rounded-lg">
                   <span className="text-primary-200 text-sm">Price Range</span>
@@ -108,7 +126,7 @@ export default function CityServicePage({ params }) {
             </div>
 
             <div>
-              <LeadForm 
+              <LeadForm
                 preselectedService={service.slug}
                 preselectedLocation={location.slug}
                 variant="hero"
@@ -247,13 +265,13 @@ export default function CityServicePage({ params }) {
       )}
 
       {/* FAQs */}
-      {faqs.length > 0 && (
-        <section className="py-16">
+      {faqsShown.length > 0 && (
+        <section className="py-16" id="faqs">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-8">
               {service.name} FAQs
             </h2>
-            <FAQAccordion faqs={faqs.slice(0, 5)} />
+            <FAQAccordion faqs={faqsShown} />
           </div>
         </section>
       )}
