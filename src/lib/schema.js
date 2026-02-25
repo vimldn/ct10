@@ -1,28 +1,26 @@
-const baseUrl = "https://www.cosmetictreatment.co.uk";
+const baseUrl = 'https://www.cosmetictreatment.co.uk';
 
 export function organizationSchema() {
   return {
-    "@context": "https://schema.org",
-    "@graph": [
+    '@context': 'https://schema.org',
+    '@graph': [
       {
-        "@type": "Organization",
-        "@id": `${baseUrl}/#org`,
-        name: "Cosmetic Treatment London",
+        '@type': 'Organization',
+        '@id': `${baseUrl}/#org`,
+        name: 'Cosmetic Treatment London',
         url: baseUrl,
         logo: {
-          "@type": "ImageObject",
+          '@type': 'ImageObject',
           url: `${baseUrl}/logo-512.png`,
         },
-        areaServed: "London, UK",
+        areaServed: 'London, UK',
       },
       {
-        "@type": "WebSite",
-        "@id": `${baseUrl}/#website`,
+        '@type': 'WebSite',
+        '@id': `${baseUrl}/#website`,
         url: baseUrl,
-        name: "Cosmetic Treatments London",
-        publisher: {
-          "@id": `${baseUrl}/#org`,
-        },
+        name: 'Cosmetic Treatments London',
+        publisher: { '@id': `${baseUrl}/#org` },
       },
     ],
   };
@@ -30,10 +28,10 @@ export function organizationSchema() {
 
 export function breadcrumbSchema(items) {
   return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: items.map((item, index) => ({
-      "@type": "ListItem",
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: (items || []).map((item, index) => ({
+      '@type': 'ListItem',
       position: index + 1,
       name: item.name,
       item: item.url,
@@ -41,52 +39,79 @@ export function breadcrumbSchema(items) {
   };
 }
 
-export function serviceSchema(service, city = null) {
+export function serviceSchema({ service, url, areaName }) {
+  const name = areaName ? `${service.name} in ${areaName}` : `${service.name} in London`;
+
   return {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    name: city
-      ? `${service.name} in ${city.name}`
-      : `${service.name} in London`,
-    description: service.description,
-    areaServed: city ? city.name : "London",
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name,
+    description: service.description || service.shortDescription || '',
+    areaServed: areaName || 'London',
     provider: {
-      "@type": "Organization",
-      name: "Cosmetic Treatment London",
+      '@type': 'Organization',
+      '@id': `${baseUrl}/#org`,
+      name: 'Cosmetic Treatment London',
       url: baseUrl,
     },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url,
+    },
   };
 }
 
-export function blogPostSchema(post) {
+export function blogPostSchema({ blog, url }) {
   return {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: post.excerpt,
-    datePublished: post.date,
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: blog.title,
+    description: blog.metaDescription || blog.excerpt || '',
+    image: blog.image ? [blog.image] : undefined,
+    datePublished: blog.date || undefined,
+    dateModified: blog.date || undefined,
     author: {
-      "@type": "Organization",
-      name: "Cosmetic Treatment London",
+      '@type': 'Person',
+      name: blog.author || 'Cosmetic Treatment London',
+    },
+    publisher: {
+      '@type': 'Organization',
+      '@id': `${baseUrl}/#org`,
+      name: 'Cosmetic Treatment London',
+      url: baseUrl,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${baseUrl}/logo-512.png`,
+      },
     },
     mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `${baseUrl}/blog/${post.slug}`,
+      '@type': 'WebPage',
+      '@id': url,
     },
   };
 }
 
-export function faqSchema(faqs) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqs.map((faq) => ({
-      "@type": "Question",
-      name: faq.question,
+export function faqSchema({ faqs, url }) {
+  const cleanFaqs = (faqs || [])
+    .filter((f) => f && f.question && f.answer)
+    .map((f) => ({
+      '@type': 'Question',
+      name: String(f.question),
       acceptedAnswer: {
-        "@type": "Answer",
-        text: faq.answer,
+        '@type': 'Answer',
+        text: String(f.answer),
       },
-    })),
+    }));
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: cleanFaqs,
+    mainEntityOfPage: url
+      ? {
+          '@type': 'WebPage',
+          '@id': url,
+        }
+      : undefined,
   };
 }
