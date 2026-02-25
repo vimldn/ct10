@@ -2,6 +2,8 @@ import './globals.css';
 import Script from 'next/script';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import JsonLd from '@/components/JsonLd';
+import { organizationSchema } from '@/lib/schema';
 
 export const metadata = {
   title: 'Cosmetic Treatments London | Compare Top Providers | Free Quotes',
@@ -19,6 +21,9 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+
+        {/* Sitewide structured data */}
+        <JsonLd data={organizationSchema()} />
       </head>
       <body className="font-sans bg-gray-50 text-gray-900 antialiased">
         {/* Google Analytics */}
@@ -34,6 +39,7 @@ export default function RootLayout({ children }) {
             gtag('config', 'G-0G8KENQHGH');
           `}
         </Script>
+
         <Header />
         <main className="min-h-screen">
           {children}
