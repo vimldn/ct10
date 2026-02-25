@@ -5,7 +5,8 @@ import FAQAccordion from '@/components/FAQAccordion';
 import { getAllLocations, getLocationBySlug, getLocationsByBorough, getAllLocationSlugs } from '@/data/locations';
 import { services } from '@/data/services';
 import { getLocationData } from '@/data/contentGenerator';
-
+import JsonLd from '@/components/JsonLd';
+import { breadcrumbSchema } from '@/lib/schema';
 
 export async function generateStaticParams() {
   return getAllLocationSlugs().map((slug) => ({ city: slug }));
@@ -28,6 +29,7 @@ export default function CityPage({ params }) {
   if (!location) {
     notFound();
   }
+
   const nearbyLocations = location.nearbyAreas
     .map(name => getAllLocations().find(l => l.name === name))
     .filter(Boolean)
@@ -37,16 +39,25 @@ export default function CityPage({ params }) {
     .filter(l => l.slug !== location.slug)
     .slice(0, 8);
 
+  const baseUrl = 'https://www.cosmetictreatment.co.uk';
+  const crumbs = breadcrumbSchema([
+    { name: 'Home', url: baseUrl },
+    { name: 'Locations', url: `${baseUrl}/locations` },
+    { name: location.name, url: `${baseUrl}/locations/${location.slug}` },
+  ]);
+
   return (
     <>
+      <JsonLd data={crumbs} />
+
       {/* Hero */}
       <section className="relative bg-gray-900 text-white min-h-[500px]">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: "url('https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=2068')" }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/85 to-gray-900/40" />
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -57,14 +68,14 @@ export default function CityPage({ params }) {
                 <span className="mx-2">/</span>
                 <span className="text-white">{location.name}</span>
               </nav>
-              
+
               <h1 className="text-4xl md:text-5xl font-display font-bold mb-6">
                 Cosmetic Treatments in {location.name}
               </h1>
-           <p className="text-xl text-gray-300 mb-8">
-  {locationData?.heroIntro || `Compare verified aesthetic clinics and practitioners in ${location.name}. Get free quotes within 2 hours.`}
-</p>
-              
+              <p className="text-xl text-gray-300 mb-8">
+                {locationData?.heroIntro || `Compare verified aesthetic clinics and practitioners in ${location.name}. Get free quotes within 2 hours.`}
+              </p>
+
               {/* Trust Badges */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-white/10 backdrop-blur rounded-lg p-3 text-center">
@@ -83,7 +94,7 @@ export default function CityPage({ params }) {
             </div>
 
             <div>
-              <LeadForm 
+              <LeadForm
                 preselectedLocation={location.slug}
                 title={`Get Quotes in ${location.name}`}
                 subtitle="Top local clinics will call you within 2 hours"
@@ -93,7 +104,7 @@ export default function CityPage({ params }) {
         </div>
       </section>
 
-   {/* Why Cosmetic Treatments Matter Here */}
+      {/* Why Cosmetic Treatments Matter Here */}
       {locationData && (
         <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -116,7 +127,7 @@ export default function CityPage({ params }) {
                   ))}
                 </ul>
               </div>
-              
+
               <div className="bg-gray-900 text-white rounded-2xl p-8">
                 <h3 className="text-lg font-semibold mb-6">{location.name} at a Glance</h3>
                 <div className="space-y-4">
@@ -137,7 +148,7 @@ export default function CityPage({ params }) {
                     <span className="font-semibold text-right text-sm">{locationData.glance.mainAreas}</span>
                   </div>
                 </div>
-                
+
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-4 mt-8">
                   <div className="bg-gray-800 rounded-lg p-4 text-center">
@@ -164,7 +175,7 @@ export default function CityPage({ params }) {
           <p className="text-gray-600 mb-8">
             Compare prices from verified providers for these treatments
           </p>
-          
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {services.map((service) => (
               <Link
